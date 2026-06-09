@@ -2,6 +2,11 @@
 
 A full-stack Expense Tracker web application built using Angular, FastAPI, SQLAlchemy, and JWT Authentication. The application enables users to securely manage their expenses, monitor spending patterns, and analyze financial data through an interactive dashboard.
 
+## 🚀 Live Demo
+
+**Live Website:**
+https://expense-tracker-beta-two-96.vercel.app
+
 ---
 
 ## 📌 Features
@@ -72,25 +77,7 @@ A full-stack Expense Tracker web application built using Angular, FastAPI, SQLAl
 Expense-Tracker/
 │
 ├── frontend/
-│   ├── src/
-│   ├── angular.json
-│   ├── package.json
-│   └── ...
-│
 ├── backend/
-│   ├── app/
-│   │   ├── config/
-│   │   ├── database/
-│   │   ├── dependencies/
-│   │   ├── models/
-│   │   ├── routes/
-│   │   ├── schemas/
-│   │   ├── utils/
-│   │   └── main.py
-│   │
-│   ├── requirements.txt
-│   └── runtime.txt
-│
 └── README.md
 ```
 
