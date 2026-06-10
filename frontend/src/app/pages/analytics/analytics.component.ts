@@ -1,7 +1,16 @@
-import { Component, inject, OnInit, ElementRef, ViewChild } from '@angular/core';
+import {
+  Component,
+  inject,
+  OnInit,
+  AfterViewInit,
+  ElementRef,
+  ViewChild
+} from '@angular/core';
+
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+
 import { ExpenseService } from '../../services/expense.service';
 import { CategoryTotal, MonthlyTrend } from '../../models/models';
 
@@ -119,23 +128,24 @@ Chart.register(
     }
   `]
 })
-export class AnalyticsComponent implements OnInit {
+export class AnalyticsComponent implements OnInit, AfterViewInit {
 
   private expenseService = inject(ExpenseService);
 
-  @ViewChild('pieChart')
-  pieChartRef!: ElementRef;
+  @ViewChild('pieChart', { static: false })
+  pieChartRef!: ElementRef<HTMLCanvasElement>;
 
-  @ViewChild('barChart')
-  barChartRef!: ElementRef;
+  @ViewChild('barChart', { static: false })
+  barChartRef!: ElementRef<HTMLCanvasElement>;
 
-  @ViewChild('lineChart')
-  lineChartRef!: ElementRef;
+  @ViewChild('lineChart', { static: false })
+  lineChartRef!: ElementRef<HTMLCanvasElement>;
 
   data: CategoryTotal[] = [];
   trendData: MonthlyTrend[] = [];
 
   loading = true;
+  private viewReady = false;
 
   get grandTotal(): number {
     return this.data.reduce(
@@ -159,10 +169,8 @@ export class AnalyticsComponent implements OnInit {
             this.loading = false;
 
             setTimeout(() => {
-              this.createPieChart();
-              this.createBarChart();
-              this.createLineChart();
-            });
+              this.renderCharts();
+            }, 500);
 
           },
           error: () => {
@@ -177,7 +185,36 @@ export class AnalyticsComponent implements OnInit {
     });
   }
 
-  createPieChart() {
+  ngAfterViewInit(): void {
+    this.viewReady = true;
+  }
+
+  private renderCharts(): void {
+
+    if (!this.viewReady) {
+      setTimeout(() => this.renderCharts(), 300);
+      return;
+    }
+
+    if (
+      !this.pieChartRef ||
+      !this.barChartRef ||
+      !this.lineChartRef
+    ) {
+      return;
+    }
+
+    if (this.data.length > 0) {
+      this.createPieChart();
+      this.createBarChart();
+    }
+
+    if (this.trendData.length > 0) {
+      this.createLineChart();
+    }
+  }
+
+  private createPieChart(): void {
 
     new Chart(this.pieChartRef.nativeElement, {
       type: 'pie',
@@ -190,7 +227,7 @@ export class AnalyticsComponent implements OnInit {
     });
   }
 
-  createBarChart() {
+  private createBarChart(): void {
 
     new Chart(this.barChartRef.nativeElement, {
       type: 'bar',
@@ -204,7 +241,7 @@ export class AnalyticsComponent implements OnInit {
     });
   }
 
-  createLineChart() {
+  private createLineChart(): void {
 
     new Chart(this.lineChartRef.nativeElement, {
       type: 'line',
@@ -212,7 +249,7 @@ export class AnalyticsComponent implements OnInit {
         labels: this.trendData.map(x => x.month),
         datasets: [{
           label: 'Monthly Expenses',
-          data: this.trendData.map(x => x.total),
+          data: this.trendData.map(x => Number(x.total)),
           fill: false
         }]
       }
